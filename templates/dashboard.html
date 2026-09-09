@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Threat Intelligence Dashboard</title>
+</head>
+
+<body>
+    <h1>Threat Intelligence Dashboard</h1>
+    <section>
+        <h2>Overview</h2>
+        <p>Total Indicators:<strong>{{ total }}</strong></p>
+        <p>High Risk:<strong>{{ high }}</strong></p>
+        <p>Medium Risk:<strong>{{ medium }}</strong></p>
+        <p>Low Risk:<strong>{{ low }}</strong></p>
+    </section>
+
+    <section>
+        <form method="GET" action="/">
+            <label for="severity">Filter by severity:</label>
+            <select name="severity" id="severity">
+                <option value="">All</option>
+                <option value="high"{% if severity == "high" %}selected{% endif %}>High</option>
+                <option value="medium"{% if severity == "medium" %}selected{% endif %}>Medium</option>
+                <option value="low"{% if severity == "low" %}selected{% endif %}>Low</option>
+            </select>
+            <button type="submit">Filter</button>
+        </form>
+        <h2>Indicators</h2>
+        <table border="1">
+    <thead>
+        <tr>
+            <th>Indicator</th>
+            <th>Type</th>
+            <th>Sources</th>
+            <th>Malware</th>
+            <th>Risk</th>
+            <th>Score</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for item in indicators %}
+        <tr>
+            <td>
+                <a href="{{ url_for(
+                    'indicator',
+                    value=item.indicator.value
+                ) }}">
+                    {{ item.indicator.value }}
+                </a>
+            </td>
+            <td>{{ item.indicator.indicator_type }}</td>
+            <td>{{ item.observations | length }}</td>
+            <td>
+                {% set malware = [] %}
+                {% for observation in item.observations %}
+                    {% if observation.malware_family %}
+                        {{ observation.malware_family }}
+                    {% endif %}
+                {% endfor %}
+            </td>
+            <td>{{ item.analysis.severity }}</td>
+            <td>{{ item.analysis.score }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+    </section>
+</body>
+</html>
