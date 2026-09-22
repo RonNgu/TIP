@@ -1,3 +1,4 @@
+import json
 from collectors import threatfox
 from collectors import bazaar
 from collectors import urlhaus
@@ -10,8 +11,14 @@ from modeling.observe import Observation
 from enrichment.enrich import PyOTIEnricher
 from analyze.score import ThreatAnalyzer
 from storage.json_store import save_indicators
+from match.matching import VendorMatcher
 
 def run_pipeline():
+    with open("data/vendors.json", "r", encoding="utf-8") as file:
+        vendors = json.load(file)
+
+    vendor_matcher = VendorMatcher(vendors)
+
     observations = []
     # 1. ThreatFox
     print("Collecting ThreatFox...")
@@ -70,7 +77,22 @@ def run_pipeline():
     #     except Exception as error:
     #         record.enrichment_status = "failed"
     #         record.enrichment = {"error": str(error)}
+    for record in indicator_records:
 
+        matches = vendor_matcher.match(record)
+
+        record.vendor_matches = matches
+
+    if matches:
+        record.relevance = {
+            "relevant": True,
+            "reason": "Vendor infrastructure match"
+        }
+    else:
+        record.relevance = {
+            "relevant": False,
+            "reason": "No known vendor relationship"
+        }
     # ANALYSIS
     analyzer = ThreatAnalyzer()
     for record in indicator_records:

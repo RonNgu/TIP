@@ -1,0 +1,25 @@
+[
+    {
+        "name": "Microsoft",
+        "domains": [
+            "microsoft.com",
+            "office.com",
+            "azure.com",
+            "cloud.microsoft"
+        ]
+    },
+    {
+        "name": "Cisco",
+        "domains": [
+            "cisco.com",
+            "webex.com"
+        ]
+    },
+    {
+        "name": "Palo Alto Networks",
+        "domains": [
+            "paloaltonetworks.com",
+            "pan.dev"
+        ]
+    }
+]

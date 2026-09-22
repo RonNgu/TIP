@@ -8,3 +8,5 @@ class IndicatorRecord:
     observations: list[Observation] = field(default_factory=list)
     enrichment: dict = field(default_factory=dict)
     analysis: dict = field(default_factory=dict)
+    vendor_matches: list[dict] = field(default_factory=list)
+    relevance: dict = field(default_factory=dict)
