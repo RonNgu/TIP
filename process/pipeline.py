@@ -20,7 +20,7 @@ def run_pipeline():
     vendor_matcher = VendorMatcher(vendors)
 
     observations = []
-    # 1. ThreatFox
+    # ThreatFox
     print("Collecting ThreatFox...")
     threatfox_response = threatfox.collect_ioc()
 
@@ -32,7 +32,7 @@ def run_pipeline():
         f"ThreatFox observations: "
         f"{len(observations)}"
     )
-    # 2. URLhaus
+    # URLhaus
     print("Collecting URLhaus...")
     urlhaus_response = urlhaus.collect_urls()
     urlhaus_records = urlhaus_response.get("urls", [])
@@ -47,7 +47,7 @@ def run_pipeline():
         f"URLhaus observations: "
         f"{urlhaus_count}"
     )
-    # 3. MalwareBazaar
+    # MalwareBazaar
     print("Collecting MalwareBazaar...")
     malwarebazaar_response = (bazaar.collect_recent_samples())
     bazaar_count = 0
@@ -61,7 +61,7 @@ def run_pipeline():
         f"MalwareBazaar observations: "
         f"{bazaar_count}"
     )
-    # 4. Deduplicate
+    # Deduplicate
     print("Deduplicating...")
     indicator_records = deduplicating(observations)
     # print("Enriching indicators with PyOTI...")
@@ -78,21 +78,19 @@ def run_pipeline():
     #         record.enrichment_status = "failed"
     #         record.enrichment = {"error": str(error)}
     for record in indicator_records:
-
         matches = vendor_matcher.match(record)
-
         record.vendor_matches = matches
 
-    if matches:
-        record.relevance = {
-            "relevant": True,
-            "reason": "Vendor infrastructure match"
-        }
-    else:
-        record.relevance = {
-            "relevant": False,
-            "reason": "No known vendor relationship"
-        }
+        if matches:
+            record.relevance = {
+                "relevant": True,
+                "reason": "Vendor infrastructure match"
+            }
+        else:
+            record.relevance = {
+                "relevant": False,
+                "reason": "No known vendor relationship"
+            }
     # ANALYSIS
     analyzer = ThreatAnalyzer()
     for record in indicator_records:
