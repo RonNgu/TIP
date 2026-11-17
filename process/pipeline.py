@@ -12,15 +12,19 @@ from enrichment.enrich import PyOTIEnricher
 from analyze.score import ThreatAnalyzer
 from storage.json_store import save_indicators
 from match.matching import VendorMatcher
+from match.internal_match import InternalRelevanceMatcher
 
 def run_pipeline():
     with open("data/vendors.json", "r", encoding="utf-8") as file:
         vendors = json.load(file)
-
     vendor_matcher = VendorMatcher(vendors)
 
+    with open("data/internal_sightings.json", "r", encoding="utf-8") as file:
+        internal_sightings = json.load(file)
+    internal_matcher = InternalRelevanceMatcher(internal_sightings)
+
     observations = []
-    # ThreatFox
+
     print("Collecting ThreatFox...")
     threatfox_response = threatfox.collect_ioc()
 
@@ -32,7 +36,9 @@ def run_pipeline():
         f"ThreatFox observations: "
         f"{len(observations)}"
     )
+
     # URLhaus
+
     print("Collecting URLhaus...")
     urlhaus_response = urlhaus.collect_urls()
     urlhaus_records = urlhaus_response.get("urls", [])
@@ -47,7 +53,7 @@ def run_pipeline():
         f"URLhaus observations: "
         f"{urlhaus_count}"
     )
-    # MalwareBazaar
+    #MalwareBazaar
     print("Collecting MalwareBazaar...")
     malwarebazaar_response = (bazaar.collect_recent_samples())
     bazaar_count = 0
@@ -61,7 +67,7 @@ def run_pipeline():
         f"MalwareBazaar observations: "
         f"{bazaar_count}"
     )
-    # Deduplicate
+    #Deduplicate
     print("Deduplicating...")
     indicator_records = deduplicating(observations)
     # print("Enriching indicators with PyOTI...")
@@ -91,6 +97,7 @@ def run_pipeline():
                 "relevant": False,
                 "reason": "No known vendor relationship"
             }
+        record.internal_relevance = (internal_matcher.match(record))
     # ANALYSIS
     analyzer = ThreatAnalyzer()
     for record in indicator_records:
@@ -98,6 +105,7 @@ def run_pipeline():
 
     save_indicators(indicator_records)
     print("Dun")
+    return indicator_records
 
 def print_summary(records):
     for record in records:
@@ -112,9 +120,7 @@ def print_summary(records):
         )
 
         for observation in record.observations:
-            print(
-                f"  - {observation.source}"
-            )
+            print(f"  - {observation.source}")
 
 if __name__ == "__main__":
     records = run_pipeline()

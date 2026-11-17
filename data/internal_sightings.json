@@ -1,0 +1,12 @@
+[
+    {
+        "value": "http://153.117.34.117:52811/Mozi.m",
+        "host": "PC-01",
+        "source": "dns"
+    },
+    {
+        "value": "evil-example.com",
+        "host": "PC-02",
+        "source": "dns"
+    }
+]

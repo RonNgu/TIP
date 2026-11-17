@@ -10,3 +10,4 @@ class IndicatorRecord:
     analysis: dict = field(default_factory=dict)
     vendor_matches: list[dict] = field(default_factory=list)
     relevance: dict = field(default_factory=dict)
+    internal_relevance: dict = field(default_factory=dict)
